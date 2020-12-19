@@ -3,13 +3,23 @@
  */
 
 import axios from 'axios'
-
+import JSONbig from 'json-bigint'
 // axios.get()
 // 创建一个axios实例 == 复制了一个axios
 // 通过这个实例去发请求
 const request = axios.create({
   //   baseURL: 'http://ttapi.research.itcast.cn/'
-  baseURL: 'http://api-toutiao-web.itheima.net/'
+  baseURL: 'http://api-toutiao-web.itheima.net/',
+  // 定制 axios 返回的数据操作
+  transformResponse: [function (data) {
+    // 对 data 进行任意转换处理
+    try {
+      return JSONbig.parse(data)
+    }catch(err){
+      return data
+    }
+
+  }]
 })
 
 // 请求拦截器
