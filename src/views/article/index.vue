@@ -86,12 +86,14 @@
         <el-table-column prop="pubdate" label="发布时间" align="center">
         </el-table-column>
         <el-table-column label="操作" align="center">
+          //调到publish页码携带id
           <template slot-scope="scope">
             <el-button
               size="small"
               circle
               type="primary"
               icon="el-icon-edit"
+              @click="$router.push('/publish?id=' + scope.row.id)"
             ></el-button>
             <el-button
               size="small"

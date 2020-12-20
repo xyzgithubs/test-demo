@@ -27,4 +27,36 @@ export const deleteArticle = (articleDeleteId)=>{
     url:`/mp/v1_0/articles/${articleDeleteId}`,
   })
 }
+// 添加
+export const addArticle = (data,draft)=>{
+  return request({
+    method:'POST',
+    url:'/mp/v1_0/articles',
+    params:{
+      draft
+    },
+    data
 
+  })
+}
+// 获取指定文章
+export const getArticleID = (articleId)=>{
+  return request({
+    method:'GET',
+    url:`/mp/v1_0/articles/${articleId}`
+
+  })
+}
+
+// 编辑文章（修改）
+export const updataArticle = (articleId,data,draft)=>{
+  return request({
+    method:'PUT',
+    url:`/mp/v1_0/articles/${articleId}`,
+    params:{
+      draft
+    },
+    data
+
+  })
+}

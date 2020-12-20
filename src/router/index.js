@@ -5,6 +5,7 @@ import Login from '@/views/login/'
 import Home from '@/views/home/'
 import Layout from '@/views/layout'
 import Article from '@/views/article'
+import Publish from '@/views/publish'
 
 Vue.use(VueRouter);
 // vue-router.esm.js?8c4f:2257 TypeError: Cannot read property '$createElement' of undefined
@@ -28,6 +29,11 @@ const routes = [
         path: '/article', // 空 默认匹配的路由
         name: 'article',
         component: Article
+      },
+      {
+        path: '/publish', // 空 默认匹配的路由
+        name: 'publish',
+        component: Publish
       }
     ]
   }
