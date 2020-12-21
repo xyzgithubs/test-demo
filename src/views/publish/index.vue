@@ -9,14 +9,26 @@
           }}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
-      <el-form ref="form" :model="article" label-width="80px">
-        <el-form-item label="标题">
+      <el-form
+        :rules="publishRules"
+        ref="publishRef"
+        :model="article"
+        label-width="80px"
+      >
+        <el-form-item label="标题" prop="title">
           <el-input v-model="article.title"></el-input>
         </el-form-item>
-        <el-form-item label="内容">
-          <el-input type="textarea" v-model="article.content"></el-input>
+        <el-form-item label="内容" prop="content">
+          <!-- <el-input type="textarea" v-model="article.content"></el-input> -->
+          <el-tiptap
+            lang="zh"
+            v-model="article.content"
+            :extensions="extensions"
+            height="350"
+            placeholder="请输入文章内容"
+          />
         </el-form-item>
-        <el-form-item label="封面">
+        <el-form-item label="封面" prop="cover">
           <el-radio-group v-model="article.cover.type">
             <el-radio :label="1">单图</el-radio>
             <el-radio :label="3">三图</el-radio>
@@ -24,7 +36,7 @@
             <el-radio :label="-1">自动</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="频道">
+        <el-form-item label="频道" prop="channel_id">
           <el-select v-model="article.channel_id" placeholder="请选择频道">
             <el-option
               v-for="(channelItem, index) in channels"
@@ -53,7 +65,30 @@ import {
   getArticleID,
   updataArticle,
 } from "@/api/article";
+import { updataImages } from "@/api/images";
+import {
+  // 需要的 extensions
+  ElementTiptap,
+  Doc,
+  Text,
+  Paragraph,
+  Heading,
+  Bold,
+  Image,
+  Underline,
+  Italic,
+  Strike,
+  ListItem,
+  BulletList,
+  OrderedList,
+  HorizontalRule,
+  Fullscreen,
+} from "element-tiptap";
+import "element-tiptap/lib/index.css";
 export default {
+  components: {
+    "el-tiptap": ElementTiptap,
+  },
   data() {
     return {
       channels: [],
@@ -65,6 +100,77 @@ export default {
           images: [],
         },
         channel_id: null,
+      },
+      extensions: [
+        new Doc(),
+        new Text(),
+        new Paragraph(),
+        new Heading({ level: 5 }),
+        new Bold({ bubble: true }), // 在气泡菜单中渲染菜单按钮
+        new Image({
+          uploadRequest(file) {
+            console.log("触发了");
+            // console.log(file);
+            const fd = new FormData();
+            fd.append("image", file);
+            return updataImages(fd).then((res) => {
+              // console.log(res);
+              return res.data.data.url;
+            });
+          },
+        }),
+        //   {
+        //   // 默认会把图片生成 base64 字符串和内容存储在一起，如果需要自定义图片上传
+        //   uploadRequest(file) {
+        //     // 如果接口要求 Content-Type 是 multipart/form-data，则请求体必须使用 FormData
+        //     const fd = new FormData();
+        //     fd.append("image", file);
+        //     // 第1个 return 是返回 Promise 对象
+        //     // 为什么？因为 axios 本身就是返回 Promise 对象
+        //     return uploadImage(fd).then((res) => {
+        //       // 这个 return 是返回最后的结果
+        //       return res.data.data.url;
+        //     });
+        //   }, // 图片的上传方法，返回一个 Promise<url>
+        // }
+
+        new Underline({ bubble: true, menubar: false }), // 在气泡菜单而不在菜单栏中渲染菜单按钮
+        new Italic(),
+        new Strike(),
+        new ListItem(),
+        new BulletList(),
+        new OrderedList(),
+        new HorizontalRule(), // 分割线
+        new Fullscreen(), // 全屏
+      ],
+      publishRules: {
+        title: [
+          { required: true, message: "请输入标题", trigger: "blur" },
+          {
+            min: 5,
+            max: 30,
+            message: "长度在 5 到 30 个字符",
+            trigger: "blur",
+          },
+        ],
+        content: [
+          {
+            validator(rule, value, callback) {
+              console.log("validator");
+              if (value === "<p></p>") {
+                // 验证失败
+                callback(new Error("请输入内容"));
+              } else {
+                // 验证成功
+                callback();
+              }
+            },
+          },
+          { required: true, message: "请输入文章内容", trigger: "blur" },
+        ],
+        channel_id: [
+          { required: true, message: "请选择文章频道", trigger: "blur" },
+        ],
       },
     };
   },
@@ -85,29 +191,36 @@ export default {
       });
     },
     onPublish(draft = false) {
-      // 判断有无id,来确定是新增还是修改
-      const articleID = this.$route.query.id;
-      if (articleID) {
-        // 修改
-        updataArticle(articleID, this.article, draft).then((res) => {
-          // console.log(res);
-          this.$message({
-            message: `${draft ? "存入草稿" : "发布"}完成`,
-            type: "success",
+      // 先要判断校验是否通过
+      this.$refs["publishRef"].validate((valid) => {
+        console.log(valid, "valid");
+        if (!valid) {
+          return;
+        }
+        // 判断有无id,来确定是新增还是修改
+        const articleID = this.$route.query.id;
+        if (articleID) {
+          // 修改
+          updataArticle(articleID, this.article, draft).then((res) => {
+            // console.log(res);
+            this.$message({
+              message: `${draft ? "存入草稿" : "发布"}完成`,
+              type: "success",
+            });
+            this.$router.push("/article");
           });
-          this.$router.push("/article");
-        });
-      } else {
-        // 新增
-        addArticle(this.article, draft).then((res) => {
-          // console.log(res);
-          this.$message({
-            message: `${draft ? "存入草稿" : "发布"}完成`,
-            type: "success",
+        } else {
+          // 新增
+          addArticle(this.article, draft).then((res) => {
+            // console.log(res);
+            this.$message({
+              message: `${draft ? "存入草稿" : "发布"}完成`,
+              type: "success",
+            });
+            this.$router.push("/article");
           });
-          this.$router.push("/article");
-        });
-      }
+        }
+      });
     },
     // 修改文章
     loadArticle() {
@@ -120,5 +233,5 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less" >
 </style>
