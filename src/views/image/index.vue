@@ -42,14 +42,28 @@
             fit="cover"
           ></el-image>
           <div class="images-action">
-            <i
+            <!-- <i
               :class="{
                 'el-icon-star-on': img.is_collected,
                 'el-icon-star-off': !img.is_collected,
               }"
               @click="colledImg(img)"
-            ></i>
-            <i class="el-icon-delete-solid"></i></div
+            ></i> -->
+            <el-button
+              type="warning"
+              :icon="img.is_collected ? 'el-icon-star-on' : 'el-icon-star-off'"
+              circle
+              size="small"
+              :loading="img.loading"
+              @click="colledImg(img)"
+            ></el-button>
+            <el-button
+              type="danger"
+              size="small"
+              icon="el-icon-delete"
+              circle
+              @click="colleDelete(img)"
+            ></el-button></div
         ></el-col>
       </el-row>
       <el-pagination
@@ -89,7 +103,7 @@
 </template>
 
 <script>
-import { getImages, collectImage } from "@/api/images";
+import { getImages, collectImage, deleteImg } from "@/api/images";
 export default {
   name: "ImagesIndex",
   data() {
@@ -104,6 +118,7 @@ export default {
       page: 1,
       totalCount: 0,
       pageSize: 10,
+      // isLoding
     };
   },
   created() {
@@ -118,7 +133,11 @@ export default {
         per_page: this.pageSize,
       }).then((res) => {
         // console.log(res);
-        this.images = res.data.data.results;
+        const result = res.data.data.results;
+        result.forEach((img) => {
+          img.loading = false;
+        });
+        this.images = result;
         this.totalCount = res.data.data.total_count;
       });
     },
@@ -145,13 +164,27 @@ export default {
     },
     colledImg(img) {
       console.log(img);
+      img.loading = true;
       collectImage(img.id, !img.is_collected).then((res) => {
         console.log(res);
         img.is_collected = !img.is_collected;
+        img.loading = false;
         this.$message({
           type: "success",
           message: img.is_collected ? "收藏成功" : "取消成功",
         });
+      });
+    },
+    colleDelete(img) {
+      img.loading = true;
+      deleteImg(img.id).then((res) => {
+        console.log(res);
+        img.loading = false;
+        this.$message({
+          type: "success",
+          message: "删除成功",
+        });
+        this.loadGetImages(this.page);
       });
     },
   },
