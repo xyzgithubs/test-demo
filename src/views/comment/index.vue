@@ -34,11 +34,11 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
-        :page-sizes="[100, 200, 300, 400]"
-        :page-size="100"
+        :current-page.sync="page"
+        :page-sizes="[10, 20, 30, 40]"
+        :page-size.sync="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="400"
+        :total="totalCount"
         background
       >
       </el-pagination>
@@ -75,21 +75,27 @@ export default {
         },
       ],
       articles: [],
-      currentPage1: 5,
-      currentPage2: 5,
-      currentPage3: 5,
-      currentPage4: 4,
+      totalCount: 0,
+      pageSize: 10,
+      page: 1,
     };
   },
   created() {
     this.loadgetArticel();
   },
   methods: {
-    handleSizeChange(val) {},
-    handleCurrentChange(val) {},
-    loadgetArticel() {
+    handleSizeChange(val) {
+      this.loadgetArticel(1);
+    },
+    handleCurrentChange(page) {
+      console.log(page);
+      this.loadgetArticel(page);
+    },
+    loadgetArticel(page = 1) {
       getArticle({
         response_type: "comment",
+        page,
+        per_page: this.pageSize,
       }).then((res) => {
         // console.log(res);
         // 先处理数据再赋值
@@ -98,6 +104,7 @@ export default {
           articles.statusDisable = false;
         });
         this.articles = results;
+        this.totalCount = res.data.data.total_count;
       });
     },
     onChange(row) {
