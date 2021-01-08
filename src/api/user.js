@@ -27,4 +27,23 @@ export const getUserProfile = () => {
 
   })
 }
-//  修改用户信息
+//  修改用户头像信息
+export const updataUserPhoto = data=>{
+  return request({
+    method:'PATCH',
+    url:'/mp/v1_0/user/profile',
+    data
+  })
+}
+
+// 修改用户信息
+export const updatUserInfo = data=>{
+  return request({
+    method:'PATCH',
+    url:'/mp/v1_0/user/profile',
+    data
+  })
+}
+
+
+
