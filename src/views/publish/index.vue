@@ -35,6 +35,19 @@
             <el-radio :label="0">无图</el-radio>
             <el-radio :label="-1">自动</el-radio>
           </el-radio-group>
+          <template v-if="article.cover.type > 0">
+            <!-- <uploadcover
+              @uploadCover="upCover(index, $event)"
+              :cover-img="article.cover.images[index]"
+              v-for="(cover, index) in article.cover.type"
+              :key="cover"
+            ></uploadcover> -->
+            <uploadcover
+              v-model="article.cover.images[index]"
+              v-for="(cover, index) in article.cover.type"
+              :key="cover"
+            ></uploadcover>
+          </template>
         </el-form-item>
         <el-form-item label="频道" prop="channel_id">
           <el-select v-model="article.channel_id" placeholder="请选择频道">
@@ -59,6 +72,7 @@
 </template>
 
 <script >
+import uploadCover from "./components/uploadcover";
 import {
   getArticleChannels,
   addArticle,
@@ -85,9 +99,12 @@ import {
   Fullscreen,
 } from "element-tiptap";
 import "element-tiptap/lib/index.css";
+import Uploadcover from "./components/uploadcover";
 export default {
+  name: "publish",
   components: {
     "el-tiptap": ElementTiptap,
+    Uploadcover,
   },
   data() {
     return {
@@ -96,7 +113,7 @@ export default {
         title: "",
         content: "",
         cover: {
-          type: 0,
+          type: 1,
           images: [],
         },
         channel_id: null,
@@ -201,8 +218,9 @@ export default {
         const articleID = this.$route.query.id;
         if (articleID) {
           // 修改
+          console.log("进入编辑");
           updataArticle(articleID, this.article, draft).then((res) => {
-            // console.log(res);
+            console.log(res);
             this.$message({
               message: `${draft ? "存入草稿" : "发布"}完成`,
               type: "success",
@@ -225,9 +243,12 @@ export default {
     // 修改文章
     loadArticle() {
       getArticleID(this.$route.query.id).then((res) => {
-        // console.log(res);
+        console.log(res, "修改");
         this.article = res.data.data;
       });
+    },
+    upCover(index, url) {
+      console.log(index, url);
     },
   },
 };

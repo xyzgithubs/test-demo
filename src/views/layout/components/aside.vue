@@ -3,7 +3,7 @@
     class="nav-menu"
     router
     :collapse="isCollapse"
-    default-active="/"
+    :default-active="$route.path"
     background-color="#002033"
     text-color="#fff"
     active-text-color="#ffd04b"
@@ -24,7 +24,7 @@
       <i class="iconfont iconpublish"></i>
       <span slot="title">发布文章</span>
     </el-menu-item>
-    <el-menu-item index="comment">
+    <el-menu-item index="/comment">
       <i class="iconfont iconcomment"></i>
       <span slot="title">评论管理</span>
     </el-menu-item>
@@ -49,7 +49,9 @@ export default {
     };
   },
 
-  created() {},
+  created() {
+    console.log(this.$route.path);
+  },
   methods: {},
 };
 </script>

@@ -9,6 +9,7 @@ import Publish from '@/views/publish'
 import Image from '@/views/image'
 import Comment from '@/views/comment'
 import Settings from '@/views/settings'
+import Fans from '@/views/fans'
 
 Vue.use(VueRouter);
 // vue-router.esm.js?8c4f:2257 TypeError: Cannot read property '$createElement' of undefined
@@ -55,6 +56,12 @@ const routes = [
         path: '/settings', // 空 默认匹配的路由
         name: 'settings',
         component: Settings
+      }
+      ,
+      {
+        path: '/fans', // 空 默认匹配的路由
+        name: 'fans',
+        component: Fans
       }
     ]
   }

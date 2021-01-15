@@ -75,6 +75,7 @@
 import { getUserProfile, updataUserPhoto, updatUserInfo } from "@/api/user.js";
 import "cropperjs/dist/cropper.css";
 import Cropper from "cropperjs";
+import globalBus from "@/utils/global-bus";
 export default {
   name: "SettingIndex",
   data() {
@@ -159,14 +160,15 @@ export default {
         intro,
         emali,
       }).then((res) => {
-        console.log(res);
+        // console.log(res);
         this.$message({
           type: "success",
           message: "更新成功",
         });
         this.updataUserLoading = false;
       });
-      // this
+
+      globalBus.$emit("updataUser", this.user);
     },
   },
 };

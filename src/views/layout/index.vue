@@ -1,24 +1,25 @@
 <template>
   <el-container class="layout-container">
-    <el-aside class="aside"
-              width="auto">
-      <app-aside class="aside-menu"
-                 :isCollapse="isCollapse"></app-aside>
+    <el-aside class="aside" width="auto">
+      <app-aside class="aside-menu" :isCollapse="isCollapse"></app-aside>
     </el-aside>
     <el-container>
       <el-header class="header">
         <div>
-          <i :class="{'el-icon-s-fold':isCollapse,'el-icon-s-unfold':!isCollapse}"
-             @click="isCollapse=!isCollapse"></i>
+          <i
+            :class="{
+              'el-icon-s-fold': isCollapse,
+              'el-icon-s-unfold': !isCollapse,
+            }"
+            @click="isCollapse = !isCollapse"
+          ></i>
           <span>这是一段文字</span>
         </div>
 
         <el-dropdown>
           <div class="avarar-wrap">
-            <img class="avarar"
-                 :src="user.photo"
-                 alt="">
-            <span>{{user.name}}</span>
+            <img class="avarar" :src="user.photo" alt="" />
+            <span>{{ user.name }}</span>
             <i class="el-icon-arrow-down el-icon--right"></i>
           </div>
           <!-- <span>
@@ -27,8 +28,11 @@
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item icon="el-icon-plus">个人设置</el-dropdown-item>
             <!-- .native修饰符  原生事件 -->
-            <el-dropdown-item icon="el-icon-circle-plus"
-                              @click.native="onLogOut">用户退出</el-dropdown-item>
+            <el-dropdown-item
+              icon="el-icon-circle-plus"
+              @click.native="onLogOut"
+              >用户退出</el-dropdown-item
+            >
           </el-dropdown-menu>
         </el-dropdown>
       </el-header>
@@ -41,54 +45,62 @@
 </template>
 
 <script>
-import AppAside from './components/aside'
-import { getUserProfile } from '@/api/user'
+import AppAside from "./components/aside";
+import { getUserProfile } from "@/api/user";
+import globalBus from "@/utils/global-bus";
+
 export default {
   components: {
-    AppAside
+    AppAside,
   },
-  data () {
+  data() {
     return {
       user: {},
       //   默认展开
-      isCollapse: false
-    }
+      isCollapse: false,
+    };
   },
 
-  created () {
-    this.loadUserProfile()
+  created() {
+    this.loadUserProfile();
+    // 监听事件总线
+    globalBus.$on("updataUser", (data) => {
+      console.log("updataUser", data);
+      this.user.name = data.name;
+      this.user.photo = data.photo;
+    });
   },
   methods: {
-    loadUserProfile () {
-      getUserProfile().then(res => {
-        this.user = res.data.data
-      })
+    loadUserProfile() {
+      getUserProfile().then((res) => {
+        this.user = res.data.data;
+      });
     },
-    onLogOut () {
-      this.$confirm('是否退出', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+    onLogOut() {
+      this.$confirm("是否退出", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       })
         .then(() => {
           // 清除登录状态
-          window.localStorage.removeItem('user')
+          window.localStorage.removeItem("user");
           this.$message({
-            type: 'success',
-            message: '退出成功!'
-          })
+            type: "success",
+            message: "退出成功!",
+          });
           //   跳到登录
-          this.$router.push('/login')
+          this.$router.push("/login");
         })
         .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消退出'
-          })
-        })
-    }
-  }
-}
+            type: "info",
+            message: "已取消退出",
+          });
+        });
+    },
+  },
+};
 </script>
 <style lang='less' scoped>
 .layout-container {
